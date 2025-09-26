@@ -11,6 +11,9 @@ jobs:
   deploy:
     name: Build and Deploy Flutter Web
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eqx
     
     steps:
     - name: Checkout code
@@ -27,24 +30,17 @@ jobs:
       run: flutter doctor -v
         
     - name: Get dependencies
-      run: |
-        cd eqx
-        flutter pub get
+      run: flutter pub get
       
     - name: Analyze code
-      run: |
-        cd eqx
-        flutter analyze --fatal-infos
+      run: flutter analyze --fatal-infos
       
     - name: Run tests
-      run: |
-        cd eqx
-        flutter test
+      run: flutter test
       continue-on-error: true
       
     - name: Enable web and build
       run: |
-        cd eqx
         flutter config --enable-web
         flutter build web --release --web-renderer canvaskit --base-href "/"
         
@@ -54,4 +50,4 @@ jobs:
         vercel-token: ${{ secrets.VERCEL_TOKEN }}
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        working-directory: ./eqx/build/web
+        working-directory: ./build/web
