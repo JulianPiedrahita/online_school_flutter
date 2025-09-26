@@ -1,50 +1,57 @@
-name: 🚀 Deploy to Vercel
+name: Deploy to Vercel
 
-# Trigger automático en push a main
+# Trigger on push to main branch
 on:
   push:
     branches: [ main ]
-  # Opción de trigger manual
+  # Manual trigger option
   workflow_dispatch:
 
 jobs:
   deploy:
-    name: Build & Deploy Flutter Web
+    name: Build and Deploy Flutter Web
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout code
+    - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: 📱 Setup Flutter
+    - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.35.4'
         channel: 'stable'
         cache: true
         
-    - name: 🔍 Flutter doctor
+    - name: Flutter doctor
       run: flutter doctor -v
         
-    - name: 📦 Get dependencies
-      run: flutter pub get
+    - name: Get dependencies
+      run: |
+        cd eqx
+        flutter pub get
       
-    - name: 🔍 Analyze code
-      run: flutter analyze --fatal-infos
+    - name: Analyze code
+      run: |
+        cd eqx
+        flutter analyze --fatal-infos
       
-    - name: 🧪 Run tests
-      run: flutter test
+    - name: Run tests
+      run: |
+        cd eqx
+        flutter test
       continue-on-error: true
       
-    - name: 🌐 Enable web & Build
+    - name: Enable web and build
       run: |
+        cd eqx
         flutter config --enable-web
         flutter build web --release --web-renderer canvaskit --base-href "/"
         
-    - name: 🚀 Deploy to Vercel
+    - name: Deploy to Vercel
       uses: vercel/action@v1
       with:
         vercel-token: ${{ secrets.VERCEL_TOKEN }}
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        working-directory: ./build/web
+        working-directory: ./eqx/build/web
