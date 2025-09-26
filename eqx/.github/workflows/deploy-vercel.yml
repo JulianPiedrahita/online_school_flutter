@@ -1,6 +1,6 @@
 name: 🚀 Deploy to Vercel
 
-# Trigger automático solo en push a main
+# Trigger automático en push a main
 on:
   push:
     branches: [ main ]
