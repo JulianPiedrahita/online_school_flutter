@@ -33,7 +33,7 @@ jobs:
       run: flutter pub get
       
     - name: Analyze code
-      run: flutter analyze --fatal-warnings
+      run: flutter analyze
       continue-on-error: true
       
     - name: Run tests
@@ -43,7 +43,7 @@ jobs:
     - name: Enable web and build
       run: |
         flutter config --enable-web
-        flutter build web --release --web-renderer canvaskit --base-href "/"
+        flutter build web --release --base-href "/"
         
     - name: Deploy to Vercel
       uses: amondnet/vercel-action@v25
