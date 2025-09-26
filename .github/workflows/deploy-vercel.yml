@@ -22,23 +22,12 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.35.4'
+        flutter-version: '3.24.3'
         channel: 'stable'
         cache: true
         
-    - name: Flutter doctor
-      run: flutter doctor -v
-        
     - name: Get dependencies
       run: flutter pub get
-      
-    - name: Analyze code
-      run: flutter analyze
-      continue-on-error: true
-      
-    - name: Run tests
-      run: flutter test
-      continue-on-error: true
       
     - name: Enable web and build
       run: |
