@@ -461,6 +461,36 @@ class AuthService {
     return false;
   }
 
+  // Método de logout
+  Future<void> logout() async {
+    try {
+      if (FirebaseConfig.enableDebugMode) {
+        print('Starting logout process...');
+      }
+
+      // Limpiar tokens almacenados
+      _currentIdToken = null;
+      _currentRefreshToken = null;
+      
+      // Limpiar usuario actual
+      _currentUser = null;
+      
+      // Actualizar streams
+      _userController.add(null);
+      _setStatus(AuthStatus.unauthenticated);
+      
+      if (FirebaseConfig.enableDebugMode) {
+        print('Logout completed successfully');
+      }
+      
+    } catch (e) {
+      if (FirebaseConfig.enableDebugMode) {
+        print('Error during logout: $e');
+      }
+      // No re-lanzar el error, logout local siempre debe funcionar
+    }
+  }
+
   // Método privado para cambiar estado
   void _setStatus(AuthStatus status) {
     _currentStatus = status;
