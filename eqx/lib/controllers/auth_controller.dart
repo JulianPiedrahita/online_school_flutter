@@ -262,6 +262,33 @@ class AuthController extends ChangeNotifier {
     _errorMessage = null;
   }
 
+  // Método de logout
+  Future<void> logout() async {
+    try {
+      _setLoading(true);
+      
+      // Llamar al servicio de logout
+      await _authService.logout();
+      
+      // Limpiar el usuario actual
+      _currentUser = null;
+      
+      // Limpiar todos los formularios
+      _clearAllForms();
+      
+      // Notificar cambios
+      if (!_disposed) {
+        notifyListeners();
+      }
+      
+    } catch (e) {
+      print('Error during logout: $e');
+      throw e; // Re-lanzar para que HomeScreen pueda manejarlo
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   @override
   void dispose() {
     _disposed = true;
