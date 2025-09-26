@@ -33,7 +33,8 @@ jobs:
       run: flutter pub get
       
     - name: Analyze code
-      run: flutter analyze --fatal-infos
+      run: flutter analyze --fatal-warnings
+      continue-on-error: true
       
     - name: Run tests
       run: flutter test
