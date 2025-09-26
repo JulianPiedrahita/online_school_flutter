@@ -60,11 +60,17 @@ jobs:
         mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/eqx-android-${TIMESTAMP}.apk
         echo "APK_NAME=eqx-android-${TIMESTAMP}.apk" >> $GITHUB_ENV
         
+    - name: Compress APK to ZIP
+      run: |
+        cd build/app/outputs/flutter-apk/
+        zip ${APK_NAME}.zip ${APK_NAME}
+        echo "ZIP_NAME=${APK_NAME}.zip" >> $GITHUB_ENV
+        
     - name: Upload Android APK
       uses: actions/upload-artifact@v4
       with:
         name: android-apk
-        path: eqx/build/app/outputs/flutter-apk/${{ env.APK_NAME }}
+        path: eqx/build/app/outputs/flutter-apk/${{ env.ZIP_NAME }}
         
     - name: Send Android APK via Email
       uses: dawidd6/action-send-mail@v3
@@ -73,7 +79,7 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "🤖 EQX Android App - ${{ env.APK_NAME }}"
+        subject: "📦 EQX Android App - ${{ env.ZIP_NAME }}"
         to: piedrahitajulian32@gmail.com
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
@@ -81,15 +87,19 @@ jobs:
           
           Tu aplicación Android EQX ha sido compilada exitosamente.
           
-          📱 Archivo: ${{ env.APK_NAME }}
+          � Archivo: ${{ env.ZIP_NAME }} (contiene el APK: ${{ env.APK_NAME }})
           🗓️ Compilado: ${{ github.event.head_commit.timestamp }}
           📊 Commit: ${{ github.sha }}
           
-          ¡Instala el APK en tu dispositivo Android y prueba la app!
+          📋 Instrucciones:
+          1. Descarga el archivo ZIP adjunto
+          2. Descomprime para obtener el APK
+          3. Instala el APK en tu dispositivo Android
+          4. ¡Prueba la app!
           
           Saludos,
           GitHub Actions 🚀
-        attachments: eqx/build/app/outputs/flutter-apk/${{ env.APK_NAME }}
+        attachments: eqx/build/app/outputs/flutter-apk/${{ env.ZIP_NAME }}
 
   build-ios:
     # Solo ejecutar si Vercel fue exitoso O si es manual con build_ios=true
