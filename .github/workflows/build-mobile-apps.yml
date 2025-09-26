@@ -1,0 +1,157 @@
+name: Build Mobile Apps
+
+# Se ejecuta automáticamente cuando el deployment de Vercel es exitoso
+on:
+  workflow_run:
+    workflows: ["Deploy to Vercel"]
+    types:
+      - completed
+    branches: [main]
+  # También permite ejecución manual
+  workflow_dispatch:
+    inputs:
+      build_android:
+        description: 'Build Android APK'
+        required: true
+        default: true
+        type: boolean
+      build_ios:
+        description: 'Build iOS IPA (requires macOS)'
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  build-android:
+    # Solo ejecutar si Vercel fue exitoso O si es manual con build_android=true
+    if: ${{ (github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch' && inputs.build_android) }}
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eqx
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.3'
+        channel: 'stable'
+        cache: true
+        
+    - name: Get dependencies
+      run: flutter pub get
+      
+    - name: Build Android APK
+      run: flutter build apk --release
+      
+    - name: Rename APK with timestamp
+      run: |
+        TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+        mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/eqx-android-${TIMESTAMP}.apk
+        echo "APK_NAME=eqx-android-${TIMESTAMP}.apk" >> $GITHUB_ENV
+        
+    - name: Upload Android APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-apk
+        path: eqx/build/app/outputs/flutter-apk/${{ env.APK_NAME }}
+        
+    - name: Send Android APK via Email
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "🤖 EQX Android App - ${{ env.APK_NAME }}"
+        to: piedrahitajulian32@gmail.com
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          ¡Hola!
+          
+          Tu aplicación Android EQX ha sido compilada exitosamente.
+          
+          📱 Archivo: ${{ env.APK_NAME }}
+          🗓️ Compilado: ${{ github.event.head_commit.timestamp }}
+          📊 Commit: ${{ github.sha }}
+          
+          ¡Instala el APK en tu dispositivo Android y prueba la app!
+          
+          Saludos,
+          GitHub Actions 🚀
+        attachments: eqx/build/app/outputs/flutter-apk/${{ env.APK_NAME }}
+
+  build-ios:
+    # Solo ejecutar si Vercel fue exitoso O si es manual con build_ios=true
+    if: ${{ (github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch' && inputs.build_ios) }}
+    name: Build iOS IPA
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: eqx
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.3'
+        channel: 'stable'
+        cache: true
+        
+    - name: Get dependencies
+      run: flutter pub get
+      
+    - name: Build iOS (without signing)
+      run: |
+        flutter build ios --release --no-codesign
+        
+    - name: Create iOS Archive
+      run: |
+        TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+        cd build/ios/iphoneos
+        zip -r "../../../eqx-ios-${TIMESTAMP}.zip" Runner.app
+        echo "IOS_NAME=eqx-ios-${TIMESTAMP}.zip" >> $GITHUB_ENV
+        
+    - name: Upload iOS Archive
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-archive
+        path: eqx/${{ env.IOS_NAME }}
+        
+    - name: Send iOS Archive via Email
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "📱 EQX iOS App - ${{ env.IOS_NAME }}"
+        to: piedrahitajulian32@gmail.com
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          ¡Hola!
+          
+          Tu aplicación iOS EQX ha sido compilada exitosamente.
+          
+          📱 Archivo: ${{ env.IOS_NAME }}
+          🗓️ Compilado: ${{ github.event.head_commit.timestamp }}
+          📊 Commit: ${{ github.sha }}
+          
+          ⚠️ Nota: Este archivo necesita ser firmado con tus certificados de desarrollo para instalarse en dispositivos iOS.
+          
+          Saludos,
+          GitHub Actions 🚀
+        attachments: eqx/${{ env.IOS_NAME }}
