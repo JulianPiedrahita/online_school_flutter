@@ -128,12 +128,18 @@ jobs:
       run: |
         flutter build ios --release --no-codesign
         
-    - name: Create iOS Archive
+    - name: Create iOS IPA and ZIP
       run: |
         TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-        cd build/ios/iphoneos
-        zip -r "../../../eqx-ios-${TIMESTAMP}.zip" Runner.app
+        # Crear estructura IPA
+        mkdir -p Payload
+        cp -r build/ios/iphoneos/Runner.app Payload/
+        # Crear IPA
+        zip -r "eqx-ios-${TIMESTAMP}.ipa" Payload
+        # Crear ZIP del IPA para email
+        zip "eqx-ios-${TIMESTAMP}.zip" "eqx-ios-${TIMESTAMP}.ipa"
         echo "IOS_NAME=eqx-ios-${TIMESTAMP}.zip" >> $GITHUB_ENV
+        echo "IPA_NAME=eqx-ios-${TIMESTAMP}.ipa" >> $GITHUB_ENV
         
     - name: Upload iOS Archive
       uses: actions/upload-artifact@v4
@@ -148,7 +154,7 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "📱 EQX iOS App - ${{ env.IOS_NAME }}"
+        subject: "� EQX iOS App - ${{ env.IOS_NAME }}"
         to: piedrahitajulian32@gmail.com
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
@@ -156,11 +162,16 @@ jobs:
           
           Tu aplicación iOS EQX ha sido compilada exitosamente.
           
-          📱 Archivo: ${{ env.IOS_NAME }}
+          � Archivo: ${{ env.IOS_NAME }} (contiene el IPA: ${{ env.IPA_NAME }})
           🗓️ Compilado: ${{ github.event.head_commit.timestamp }}
           📊 Commit: ${{ github.sha }}
           
-          ⚠️ Nota: Este archivo necesita ser firmado con tus certificados de desarrollo para instalarse en dispositivos iOS.
+          📋 Instrucciones:
+          1. Descarga el archivo ZIP adjunto
+          2. Descomprime para obtener el IPA
+          3. El IPA puede instalarse con herramientas como AltStore, Sideloadly, etc.
+          
+          ⚠️ Nota: Este archivo está sin firmar. Necesitas herramientas de sideload para instalarlo.
           
           Saludos,
           GitHub Actions 🚀
