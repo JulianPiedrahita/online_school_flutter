@@ -1,9 +1,14 @@
-/// Configuración de Firebase para el proyecto database-jvs-cloud
+/// Configuración segura de Firebase siguiendo prácticas de OWASP
+/// Los API Keys de Firebase para Web son públicos por diseño y seguros
+/// Referencia: https://firebase.google.com/docs/projects/api-keys
 class FirebaseConfig {
-  // Información del proyecto Firebase
+  // Información del proyecto Firebase (valores públicos seguros)
   static const String projectName = 'database-jvs-cloud';
   static const String projectId = 'database-jvs-cloud';
   static const String projectNumber = '904097416357';
+  
+  // Firebase Web API Key - Es público y seguro según documentación oficial
+  // La seguridad se maneja via Firebase Security Rules, no ocultando el API Key
   static const String webApiKey = 'AIzaSyBImccW9tbhiGli-LaRfk-C6QQWGaSIfpw';
   
   // URLs base para Firebase Auth REST API
