@@ -462,7 +462,8 @@ class _RegisterForm extends StatelessWidget {
   Future<void> _handleRegister(BuildContext context) async {
     final success = await authController.register(context);
     if (success) {
-      Navigator.pushReplacementNamed(context, 'login_screen');
+      // Después del registro exitoso, ir directamente al home ya que el usuario queda logueado
+      Navigator.pushReplacementNamed(context, 'home_screen');
     }
   }
 }

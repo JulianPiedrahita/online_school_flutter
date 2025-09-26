@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:eqx/models/user_model.dart';
 import 'package:eqx/services/auth_service.dart';
 
 class AuthController extends ChangeNotifier {
   final AuthService _authService = AuthService();
+  StreamSubscription<User?>? _userStreamSubscription;
   
   // Form controllers
   final emailController = TextEditingController();
@@ -37,11 +39,15 @@ class AuthController extends ChangeNotifier {
   // Constructor
   AuthController() {
     // Escuchar cambios en el servicio de autenticación
-    _authService.userStream.listen((user) {
+    _userStreamSubscription = _authService.userStream.listen((user) {
       _currentUser = user;
-      notifyListeners();
+      if (!_disposed) {
+        notifyListeners();
+      }
     });
   }
+
+  bool _disposed = false;
 
   // Alternar visibilidad de contraseña
   void togglePasswordVisibility() {
@@ -258,6 +264,11 @@ class AuthController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    
+    // Cancelar suscripción al stream
+    _userStreamSubscription?.cancel();
+    
     // Limpiar controllers
     emailController.dispose();
     passwordController.dispose();

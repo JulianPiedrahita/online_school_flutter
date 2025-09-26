@@ -155,3 +155,97 @@ class RegisterData {
            password == confirmPassword;
   }
 }
+
+// Clase para manejar respuestas de Firebase Auth
+class FirebaseAuthResponse {
+  final String? idToken;
+  final String? refreshToken;
+  final String? localId; // Firebase UID
+  final String? email;
+  final String? displayName;
+  final bool? emailVerified;
+  final String? expiresIn;
+  final bool? registered;
+
+  FirebaseAuthResponse({
+    this.idToken,
+    this.refreshToken,
+    this.localId,
+    this.email,
+    this.displayName,
+    this.emailVerified,
+    this.expiresIn,
+    this.registered,
+  });
+
+  factory FirebaseAuthResponse.fromJson(Map<String, dynamic> json) {
+    return FirebaseAuthResponse(
+      idToken: json['idToken'],
+      refreshToken: json['refreshToken'],
+      localId: json['localId'],
+      email: json['email'],
+      displayName: json['displayName'],
+      emailVerified: json['emailVerified'] == true || json['emailVerified'] == 'true',
+      expiresIn: json['expiresIn'],
+      registered: json['registered'] == true || json['registered'] == 'true',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'idToken': idToken,
+      'refreshToken': refreshToken,
+      'localId': localId,
+      'email': email,
+      'displayName': displayName,
+      'emailVerified': emailVerified,
+      'expiresIn': expiresIn,
+      'registered': registered,
+    };
+  }
+}
+
+// Clase para manejar errores de Firebase
+class FirebaseAuthError {
+  final String code;
+  final String message;
+  final List<FirebaseErrorDetail> errors;
+
+  FirebaseAuthError({
+    required this.code,
+    required this.message,
+    this.errors = const [],
+  });
+
+  factory FirebaseAuthError.fromJson(Map<String, dynamic> json) {
+    final errorData = json['error'] ?? json;
+    return FirebaseAuthError(
+      code: (errorData['code'] ?? 400).toString(),
+      message: errorData['message'] ?? 'Unknown error',
+      errors: (errorData['errors'] as List?)
+          ?.map((e) => FirebaseErrorDetail.fromJson(e))
+          .toList() ?? [],
+    );
+  }
+}
+
+// Detalle de errores específicos de Firebase
+class FirebaseErrorDetail {
+  final String domain;
+  final String reason;
+  final String message;
+
+  FirebaseErrorDetail({
+    required this.domain,
+    required this.reason,
+    required this.message,
+  });
+
+  factory FirebaseErrorDetail.fromJson(Map<String, dynamic> json) {
+    return FirebaseErrorDetail(
+      domain: json['domain'] ?? 'global',
+      reason: json['reason'] ?? 'unknown',
+      message: json['message'] ?? 'Unknown error',
+    );
+  }
+}
