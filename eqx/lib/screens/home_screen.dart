@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:eqx/widgats/background.dart';
-import 'package:eqx/widgats/card_table_responsive.dart';
-import 'package:eqx/widgats/custom_bottom_navigation.dart';
-import 'package:eqx/widgats/page_title.dart';
+import 'package:eqx/widgets/background.dart';
+import 'package:eqx/widgets/card_table_responsive.dart';
+import 'package:eqx/widgets/custom_bottom_navigation.dart';
+import 'package:eqx/widgets/page_title.dart';
 import 'package:eqx/controllers/auth_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -371,85 +371,36 @@ class HomeScreen extends StatelessWidget {
       // Cerrar diálogo de confirmación
       Navigator.pop(context);
       
-      // Mostrar indicador de carga
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => Center(
-          child: Container(
-            padding: EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF16DB93)),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Cerrando sesión de forma segura...',
-                  style: TextStyle(
-                    color: Color(0xFF0F3460),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      // Realizar logout seguro
+      // Realizar logout seguro (SIN diálogo de loading para evitar problemas)
       await authController.logout();
       
-      // Pequeña pausa para UX (opcional)
-      await Future.delayed(Duration(seconds: 1));
-      
-      // Cerrar indicador de carga
-      Navigator.pop(context);
-      
-      // Navegar al login de forma segura (limpiar stack completo)
+      // Navegar al login inmediatamente
       Navigator.pushNamedAndRemoveUntil(
         context,
         'login_screen',
         (route) => false, // Remover todas las rutas anteriores por seguridad
       );
       
-      // Mostrar confirmación de logout exitoso
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.white),
-              SizedBox(width: 8),
-              Text('Sesión cerrada correctamente'),
-            ],
-          ),
-          backgroundColor: Color(0xFF16DB93),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      
     } catch (e) {
       // Manejar errores durante el logout
-      Navigator.pop(context); // Cerrar loading si está abierto
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.error, color: Colors.white),
-              SizedBox(width: 8),
-              Text('Error al cerrar sesión. Inténtalo de nuevo.'),
-            ],
+      try {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error, color: Colors.white),
+                SizedBox(width: 8),
+                Text('Error al cerrar sesión. Inténtalo de nuevo.'),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
           ),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
-        ),
-      );
+        );
+      } catch (_) {
+        // Si el contexto no está disponible, no hacer nada
+        print('No se pudo mostrar el mensaje de error del logout');
+      }
     }
   }
 }

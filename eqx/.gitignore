@@ -10,6 +10,16 @@
 .svn/
 migrate_working_dir/
 
+# Security - Environment Variables (OWASP Best Practice)
+.env
+.env.local
+.env.production
+.env.staging
+*.key
+*.pem
+secrets/
+config/secrets/
+
 # IntelliJ related
 *.iml
 *.ipr

@@ -206,11 +206,7 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  // Método de logout
-  Future<void> logout() async {
-    await _authService.logout();
-    _clearAllForms();
-  }
+
 
   // Métodos privados
   void _setLoading(bool loading) {
@@ -260,6 +256,47 @@ class AuthController extends ChangeNotifier {
     _isPasswordVisible = false;
     _isConfirmPasswordVisible = false;
     _errorMessage = null;
+  }
+
+  // Método de login con Google
+  Future<bool> loginWithGoogle(BuildContext context) async {
+    try {
+      _setLoading(true);
+      _errorMessage = null;
+
+      final result = await _authService.signInWithGoogle();
+
+      if (result.success && result.user != null) {
+        _currentUser = result.user;
+        _showSuccessSnackBar(context, '¡Bienvenido ${result.user!.firstName} ${result.user!.lastName}!');
+        return true;
+      } else {
+        _errorMessage = result.message ?? 'Error durante el inicio de sesión con Google';
+        
+        // Mensaje específico para popup cerrado
+        if (_errorMessage!.contains('cancelado')) {
+          _showErrorSnackBar(context, 'Login cancelado. Consejo: Permite popups en tu navegador para Google Sign-In.');
+        } else {
+          _showErrorSnackBar(context, _errorMessage!);
+        }
+        return false;
+      }
+    } catch (e) {
+      String errorMsg = 'Error inesperado durante el login con Google';
+      
+      // Manejar errores específicos
+      if (e.toString().contains('popup_closed')) {
+        errorMsg = 'Popup de Google cerrado. Permite popups en tu navegador e inténtalo de nuevo.';
+      } else if (e.toString().contains('access_denied')) {
+        errorMsg = 'Acceso denegado por Google. Verifica tus permisos e inténtalo de nuevo.';
+      }
+      
+      _errorMessage = errorMsg;
+      _showErrorSnackBar(context, _errorMessage!);
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   // Método de logout

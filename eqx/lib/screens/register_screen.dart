@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:eqx/widgats/background.dart';
+import 'package:eqx/widgets/background.dart';
 import 'package:eqx/controllers/auth_controller.dart';
 
 class RegisterScreen extends StatefulWidget {

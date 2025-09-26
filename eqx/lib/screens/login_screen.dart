@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:eqx/widgats/background.dart';
+import 'package:eqx/widgets/background.dart';
+import 'package:eqx/widgets/social_login_widgets.dart';
 import 'package:eqx/controllers/auth_controller.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -59,46 +60,77 @@ class _LoginBody extends StatelessWidget {
       return largeWeb;
     }
     
-    return SingleChildScrollView(
-      child: Center(
-        child: Container(
-          width: isWeb ? getResponsiveValue(400, 400, 500, 600) : double.infinity,
-          padding: EdgeInsets.symmetric(
-            horizontal: getResponsiveValue(20, 40, 60, 80),
-            vertical: getResponsiveValue(50, 80, 100, 120)
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Determinar si es una pantalla pequeña basado en la altura disponible
+        final isSmallScreen = constraints.maxHeight < 700;
+        final isVerySmallScreen = constraints.maxHeight < 600;
+        
+        return Center(
+          child: Container(
+            width: isWeb ? getResponsiveValue(400, 400, 500, 600) : double.infinity,
+            constraints: BoxConstraints(
+              maxHeight: constraints.maxHeight * 0.95, // Usar máximo 95% de altura disponible
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: getResponsiveValue(20, 40, 60, 80),
+              vertical: getResponsiveValue(
+                isVerySmallScreen ? 5 : (isSmallScreen ? 8 : 15), 
+                20, 30, 40
+              )
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: getResponsiveValue(80, 60, 80, 100)),
+              SizedBox(height: getResponsiveValue(
+                isVerySmallScreen ? 5 : (isSmallScreen ? 10 : (isWeb ? 15 : 20)),
+                30, 40, 50
+              )),
               
               // Título
               Text(
                 'EQX',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: getResponsiveValue(50, 55, 65, 75),
+                  fontSize: getResponsiveValue(
+                    isVerySmallScreen ? 35 : (isSmallScreen ? 40 : 50),
+                    55, 65, 75
+                  ),
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              
+              SizedBox(height: getResponsiveValue(
+                isVerySmallScreen ? 5 : (isSmallScreen ? 8 : 10),
+                10, 12, 15
+              )),
               
               Text(
                 'Iniciar Sesión',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: getResponsiveValue(20, 22, 24, 26),
+                  fontSize: getResponsiveValue(
+                    isVerySmallScreen ? 14 : (isSmallScreen ? 16 : 20),
+                    22, 24, 26
+                  ),
                   fontWeight: FontWeight.w300,
                 ),
               ),
               
-              SizedBox(height: getResponsiveValue(50, 40, 50, 60)),
+              SizedBox(height: getResponsiveValue(
+                isVerySmallScreen ? 8 : (isSmallScreen ? 12 : (isWeb ? 18 : 20)),
+                25, 30, 35
+              )),
               
               // Formulario
               _LoginForm(authController: authController),
             ],
           ),
         ),
-      ),
+      );
+      },
     );
   }
 }
@@ -112,6 +144,10 @@ class _LoginForm extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isWeb = kIsWeb;
     final screenSize = MediaQuery.of(context).size;
+    
+    // Detectar pantallas pequeñas por altura disponible
+    final isSmallScreen = screenSize.height < 700;
+    final isVerySmallScreen = screenSize.height < 600;
     
     // Breakpoints responsive para web
     final bool isSmallWeb = isWeb && screenSize.width < 768;
@@ -130,8 +166,14 @@ class _LoginForm extends StatelessWidget {
       animation: authController,
       builder: (context, child) {
         return Container(
-          margin: EdgeInsets.all(getResponsiveValue(20, 15, 20, 25)),
-          padding: EdgeInsets.all(getResponsiveValue(30, 25, 35, 40)),
+          margin: EdgeInsets.all(getResponsiveValue(
+            isVerySmallScreen ? 4 : (isSmallScreen ? 8 : 12),
+            10, 15, 20
+          )),
+          padding: EdgeInsets.all(getResponsiveValue(
+            isVerySmallScreen ? 10 : (isSmallScreen ? 15 : 20),
+            20, 25, 30
+          )),
           decoration: BoxDecoration(
             color: Color.fromRGBO(255, 255, 255, 0.15),
             borderRadius: BorderRadius.circular(getResponsiveValue(20, 18, 22, 25)),
@@ -177,7 +219,7 @@ class _LoginForm extends StatelessWidget {
                       borderSide: BorderSide(color: Colors.white, width: 2),
                     ),
                     contentPadding: EdgeInsets.symmetric(
-                      vertical: getResponsiveValue(16, 18, 20, 22),
+                      vertical: getResponsiveValue(12, 14, 16, 18),
                       horizontal: 12,
                     ),
                   ),
@@ -188,7 +230,10 @@ class _LoginForm extends StatelessWidget {
                   validator: authController.validateEmail,
                 ),
                 
-                SizedBox(height: getResponsiveValue(20, 18, 22, 25)),
+                SizedBox(height: getResponsiveValue(
+                  isVerySmallScreen ? 6 : (isSmallScreen ? 10 : 12),
+                  15, 18, 20
+                )),
                 
                 // Campo Password
                 TextFormField(
@@ -233,7 +278,7 @@ class _LoginForm extends StatelessWidget {
                       borderSide: BorderSide(color: Colors.white, width: 2),
                     ),
                     contentPadding: EdgeInsets.symmetric(
-                      vertical: getResponsiveValue(16, 18, 20, 22),
+                      vertical: getResponsiveValue(12, 14, 16, 18),
                       horizontal: 12,
                     ),
                   ),
@@ -244,7 +289,10 @@ class _LoginForm extends StatelessWidget {
                   validator: authController.validatePassword,
                 ),
                 
-                SizedBox(height: getResponsiveValue(30, 25, 35, 40)),
+                SizedBox(height: getResponsiveValue(
+                  isVerySmallScreen ? 8 : (isSmallScreen ? 12 : 16),
+                  20, 25, 30
+                )),
                 
                 // Botón Login
                 SizedBox(
@@ -281,6 +329,67 @@ class _LoginForm extends StatelessWidget {
                 ),
                 
                 SizedBox(height: getResponsiveValue(20, 18, 22, 25)),
+                
+                // Separador "O"
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        color: Colors.white.withOpacity(0.3),
+                        thickness: 1,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'O',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: getResponsiveValue(14, 15, 16, 17),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: Colors.white.withOpacity(0.3),
+                        thickness: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                SizedBox(height: getResponsiveValue(12, 15, 18, 20)),
+                
+                // Botones de autenticación social (Google y Apple)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Botón de Google Sign-In
+                    SocialLoginButton(
+                      onPressed: authController.isLoading ? null : () => _handleGoogleLogin(context),
+                      child: authController.isLoading
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : _GoogleIcon(size: getResponsiveValue(28, 26, 30, 32)),
+                      tooltip: 'Continuar con Google',
+                    ),
+                    
+                    // Botón de Apple Sign-In
+                    SocialLoginButton(
+                      onPressed: authController.isLoading ? null : () => _handleAppleLogin(context),
+                      child: AppleIcon(size: getResponsiveValue(28, 26, 30, 32)),
+                      tooltip: 'Continuar con Apple',
+                    ),
+                  ],
+                ),
+                
+                SizedBox(height: getResponsiveValue(10, 12, 15, 18)),
                 
                 // Link para olvidé contraseña
                 TextButton(
@@ -322,5 +431,68 @@ class _LoginForm extends StatelessWidget {
     if (success) {
       Navigator.pushReplacementNamed(context, 'home_screen');
     }
+  }
+
+  Future<void> _handleGoogleLogin(BuildContext context) async {
+    final success = await authController.loginWithGoogle(context);
+    if (success) {
+      Navigator.pushReplacementNamed(context, 'home_screen');
+    }
+  }
+
+  Future<void> _handleAppleLogin(BuildContext context) async {
+    // TODO: Implementar Apple Sign-In en futuras versiones
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Apple Sign-In estará disponible próximamente'),
+        backgroundColor: Colors.orange,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
+// Widget personalizado para el ícono de Google
+class _GoogleIcon extends StatelessWidget {
+  final double size;
+  
+  const _GoogleIcon({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFF4285F4), // Google Blue
+            Color(0xFF34A853), // Google Green
+            Color(0xFFFBBC05), // Google Yellow
+            Color(0xFFEA4335), // Google Red
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          'G',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: size * 0.45,
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 1,
+                offset: Offset(0, 1),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

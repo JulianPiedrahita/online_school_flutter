@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:eqx/models/user_model.dart';
 import 'package:eqx/config/firebase_config.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:eqx/config/secure_config.dart';
 
 // Enums para manejar estados
 enum AuthStatus { authenticated, unauthenticated, loading }
@@ -71,7 +73,21 @@ class AuthResult {
 class AuthService {
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
-  AuthService._internal();
+  AuthService._internal() {
+    _initializeGoogleSignIn();
+  }
+
+  // Google Sign-In instance - configuración segura
+  late final GoogleSignIn _googleSignIn;
+  
+  // Inicialización segura de Google Sign-In
+  void _initializeGoogleSignIn() {
+    _googleSignIn = GoogleSignIn(
+      // Configuración segura usando variables de entorno
+      scopes: ['email', 'profile'],
+      // El clientId se maneja automáticamente en web via meta tags o Firebase config
+    );
+  }
 
   // Stream controller para el estado de autenticación
   final _authStatusController = StreamController<AuthStatus>.broadcast();
@@ -298,19 +314,7 @@ class AuthService {
     }
   }
 
-  // Método de logout
-  Future<void> logout() async {
-    _currentUser = null;
-    _currentIdToken = null;
-    _currentRefreshToken = null;
-    _currentFirebaseResponse = null;
-    _setStatus(AuthStatus.unauthenticated);
-    _userController.add(null);
-    
-    if (FirebaseConfig.enableDebugMode) {
-      print('User logged out successfully');
-    }
-  }
+
 
   // Validación de email
   bool _isValidEmail(String email) {
@@ -468,6 +472,9 @@ class AuthService {
         print('Starting logout process...');
       }
 
+      // Cerrar sesión de Google si está activa
+      await signOutFromGoogle();
+
       // Limpiar tokens almacenados
       _currentIdToken = null;
       _currentRefreshToken = null;
@@ -488,6 +495,141 @@ class AuthService {
         print('Error during logout: $e');
       }
       // No re-lanzar el error, logout local siempre debe funcionar
+    }
+  }
+
+  // Método de autenticación con Google
+  Future<AuthResult> signInWithGoogle() async {
+    try {
+      _setStatus(AuthStatus.loading);
+      
+      if (FirebaseConfig.enableDebugMode) {
+        print('Starting Google Sign-In process...');
+      }
+
+      // Verificar si ya hay una sesión activa
+      GoogleSignInAccount? googleUser = _googleSignIn.currentUser;
+      
+      if (googleUser == null) {
+        // Intentar login silencioso primero
+        try {
+          googleUser = await _googleSignIn.signInSilently();
+        } catch (e) {
+          if (FirebaseConfig.enableDebugMode) {
+            print('Silent sign-in failed, trying interactive sign-in: $e');
+          }
+        }
+      }
+      
+      // Si no hay sesión silenciosa, hacer login interactivo
+      if (googleUser == null) {
+        googleUser = await _googleSignIn.signIn();
+      }
+      
+      if (googleUser == null) {
+        // Usuario canceló el login o popup se cerró
+        _setStatus(AuthStatus.unauthenticated);
+        return AuthResult.failure(
+          AuthError.unknown,
+          'Proceso de autenticación cancelado. Por favor, inténtalo de nuevo y asegúrate de permitir popups en tu navegador.'
+        );
+      }
+
+      // Obtener detalles de autenticación de Google
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      if (googleAuth.idToken == null) {
+        _setStatus(AuthStatus.unauthenticated);
+        return AuthResult.failure(
+          AuthError.unknown,
+          'No se pudo obtener el token de autenticación de Google'
+        );
+      }
+
+      // Autenticar con Firebase usando el token de Google
+      final String url = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${FirebaseConfig.webApiKey}';
+      
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'postBody': 'id_token=${googleAuth.idToken}&providerId=google.com',
+          'requestUri': 'http://localhost',
+          'returnIdpCredential': true,
+          'returnSecureToken': true,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        
+        if (FirebaseConfig.enableDebugMode) {
+          print('Google Sign-In successful: ${responseData['localId']}');
+        }
+
+        // Crear respuesta de Firebase
+        _currentFirebaseResponse = FirebaseAuthResponse.fromJson(responseData);
+        _currentIdToken = responseData['idToken'];
+        _currentRefreshToken = responseData['refreshToken'];
+
+        // Crear usuario desde los datos de Google
+        final displayName = googleUser.displayName ?? '';
+        final nameParts = displayName.split(' ');
+        final firstName = nameParts.isNotEmpty ? nameParts.first : '';
+        final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+        
+        _currentUser = User(
+          id: responseData['localId'],
+          email: googleUser.email,
+          firstName: firstName,
+          lastName: lastName,
+          phone: '', // Google no proporciona teléfono por defecto
+          city: '', // Google no proporciona ciudad por defecto
+          address: '', // Google no proporciona dirección por defecto
+        );
+
+        _userController.add(_currentUser);
+        _setStatus(AuthStatus.authenticated);
+
+        return AuthResult.success(_currentUser!);
+      } else {
+        final errorData = jsonDecode(response.body);
+        final errorMessage = errorData['error']['message'] ?? 'Error desconocido';
+        
+        if (FirebaseConfig.enableDebugMode) {
+          print('Google Sign-In Error: $errorMessage');
+        }
+
+        _setStatus(AuthStatus.unauthenticated);
+        return AuthResult.failure(
+          AuthError.unknown,
+          errorMessage
+        );
+      }
+
+    } catch (e) {
+      _setStatus(AuthStatus.unauthenticated);
+      if (FirebaseConfig.enableDebugMode) {
+        print('Google Sign-In Error: $e');
+      }
+      return AuthResult.failure(
+        AuthError.unknown,
+        'Error inesperado durante la autenticación con Google: ${e.toString()}'
+      );
+    }
+  }
+
+  // Método para cerrar sesión de Google
+  Future<void> signOutFromGoogle() async {
+    try {
+      await _googleSignIn.signOut();
+      if (FirebaseConfig.enableDebugMode) {
+        print('Google Sign-Out completed');
+      }
+    } catch (e) {
+      if (FirebaseConfig.enableDebugMode) {
+        print('Error signing out from Google: $e');
+      }
     }
   }
 
