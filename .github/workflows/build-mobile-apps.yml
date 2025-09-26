@@ -1,16 +1,7 @@
 name: Build Mobile Apps
 
-# Se ejecuta automáticamente cuando el deployment de Vercel es           📦 Archivo: ${{ env.ZIP_NAME }} (ZIP renombrado a .txt para evitar bloqueo de Gmail)
-          📱 Contiene: ${{ env.APK_NAME }}
-          🗓️ Compilado: ${{ github.event.head_commit.timestamp }}
-          📊 Commit: ${{ github.sha }}
-          
-          📋 Instrucciones:
-          1. Descarga el archivo .txt adjunto
-          2. Renómbralo de .txt a .zip
-          3. Descomprime para obtener el APK
-          4. Instala el APK en tu dispositivo Android
-          5. ¡Prueba la app!on:
+# Se ejecuta automáticamente cuando el deployment de Vercel es exitoso
+on:
   workflow_run:
     workflows: ["Deploy to Vercel"]
     types:
@@ -61,15 +52,16 @@ jobs:
       run: flutter pub get
       
     - name: Build Android APK
-      run: flutter build apk --release
-      
+      run: |
+        flutter build apk --release
+        
     - name: Rename APK with timestamp
       run: |
         TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
         mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/eqx-android-${TIMESTAMP}.apk
         echo "APK_NAME=eqx-android-${TIMESTAMP}.apk" >> $GITHUB_ENV
         
-    - name: Compress APK to ZIP and rename
+    - name: Compress APK to ZIP and rename to TXT
       run: |
         cd build/app/outputs/flutter-apk/
         zip ${APK_NAME}.zip ${APK_NAME}
@@ -90,22 +82,24 @@ jobs:
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
         subject: "📦 EQX Android App - ${{ env.ZIP_NAME }}"
-        to: piedrahitaj440@gmail.com
+        to: piedrahitajulian32@gmail.com
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
           ¡Hola!
           
           Tu aplicación Android EQX ha sido compilada exitosamente.
           
-          � Archivo: ${{ env.ZIP_NAME }} (contiene el APK: ${{ env.APK_NAME }})
+          📦 Archivo: ${{ env.ZIP_NAME }} (ZIP renombrado a .txt para evitar bloqueo de Gmail)
+          📱 Contiene: ${{ env.APK_NAME }}
           🗓️ Compilado: ${{ github.event.head_commit.timestamp }}
           📊 Commit: ${{ github.sha }}
           
           📋 Instrucciones:
-          1. Descarga el archivo ZIP adjunto
-          2. Descomprime para obtener el APK
-          3. Instala el APK en tu dispositivo Android
-          4. ¡Prueba la app!
+          1. Descarga el archivo .txt adjunto
+          2. Renómbralo de .txt a .zip
+          3. Descomprime para obtener el APK
+          4. Instala el APK en tu dispositivo Android
+          5. ¡Prueba la app!
           
           Saludos,
           GitHub Actions 🚀
@@ -164,7 +158,7 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "� EQX iOS App - ${{ env.IOS_NAME }}"
+        subject: "📦 EQX iOS App - ${{ env.IOS_NAME }}"
         to: piedrahitajulian32@gmail.com
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
@@ -172,7 +166,7 @@ jobs:
           
           Tu aplicación iOS EQX ha sido compilada exitosamente.
           
-          � Archivo: ${{ env.IOS_NAME }} (contiene el IPA: ${{ env.IPA_NAME }})
+          📦 Archivo: ${{ env.IOS_NAME }} (contiene el IPA: ${{ env.IPA_NAME }})
           🗓️ Compilado: ${{ github.event.head_commit.timestamp }}
           📊 Commit: ${{ github.sha }}
           
