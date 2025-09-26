@@ -1,7 +1,16 @@
 name: Build Mobile Apps
 
-# Se ejecuta automáticamente cuando el deployment de Vercel es exitoso
-on:
+# Se ejecuta automáticamente cuando el deployment de Vercel es           📦 Archivo: ${{ env.ZIP_NAME }} (ZIP renombrado a .txt para evitar bloqueo de Gmail)
+          📱 Contiene: ${{ env.APK_NAME }}
+          🗓️ Compilado: ${{ github.event.head_commit.timestamp }}
+          📊 Commit: ${{ github.sha }}
+          
+          📋 Instrucciones:
+          1. Descarga el archivo .txt adjunto
+          2. Renómbralo de .txt a .zip
+          3. Descomprime para obtener el APK
+          4. Instala el APK en tu dispositivo Android
+          5. ¡Prueba la app!on:
   workflow_run:
     workflows: ["Deploy to Vercel"]
     types:
@@ -60,11 +69,12 @@ jobs:
         mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/eqx-android-${TIMESTAMP}.apk
         echo "APK_NAME=eqx-android-${TIMESTAMP}.apk" >> $GITHUB_ENV
         
-    - name: Compress APK to ZIP
+    - name: Compress APK to ZIP and rename
       run: |
         cd build/app/outputs/flutter-apk/
         zip ${APK_NAME}.zip ${APK_NAME}
-        echo "ZIP_NAME=${APK_NAME}.zip" >> $GITHUB_ENV
+        mv ${APK_NAME}.zip ${APK_NAME}.txt
+        echo "ZIP_NAME=${APK_NAME}.txt" >> $GITHUB_ENV
         
     - name: Upload Android APK
       uses: actions/upload-artifact@v4
@@ -80,7 +90,7 @@ jobs:
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
         subject: "📦 EQX Android App - ${{ env.ZIP_NAME }}"
-        to: piedrahitajulian32@gmail.com
+        to: piedrahitaj440@gmail.com
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
           ¡Hola!
