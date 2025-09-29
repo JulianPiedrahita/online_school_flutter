@@ -163,6 +163,36 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  // Método de recuperación de contraseña
+  Future<bool> sendPasswordResetEmail(BuildContext context, String email) async {
+    if (email.isEmpty) {
+      _showErrorSnackBar(context, 'Por favor ingresa tu email');
+      return false;
+    }
+
+    _setLoading(true);
+    clearError();
+
+    try {
+      final result = await _authService.sendPasswordResetEmail(email);
+
+      if (result.success) {
+        _showSuccessSnackBar(context, result.message ?? 'Se ha enviado un enlace de recuperación a tu email');
+        return true;
+      } else {
+        _errorMessage = result.message ?? 'Error al enviar email de recuperación';
+        _showErrorSnackBar(context, _errorMessage!);
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Error inesperado: ${e.toString()}';
+      _showErrorSnackBar(context, _errorMessage!);
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   // Método de registro
   Future<bool> register(BuildContext context) async {
     if (!registerFormKey.currentState!.validate()) {

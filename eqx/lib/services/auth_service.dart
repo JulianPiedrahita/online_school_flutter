@@ -314,6 +314,77 @@ class AuthService {
     }
   }
 
+  // Método para recuperación de contraseña
+  Future<AuthResult> sendPasswordResetEmail(String email) async {
+    if (!_isValidEmail(email)) {
+      return AuthResult.failure(
+        AuthError.invalidEmail,
+        'Por favor ingresa un email válido'
+      );
+    }
+
+    try {
+      final requestBody = {
+        'requestType': 'PASSWORD_RESET',
+        'email': email,
+      };
+
+      final response = await http.post(
+        Uri.parse(FirebaseConfig.sendPasswordResetUrl),
+        headers: FirebaseConfig.headers,
+        body: jsonEncode(requestBody),
+      ).timeout(FirebaseConfig.requestTimeout);
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        if (FirebaseConfig.enableDebugMode) {
+          print('Password reset email sent successfully to: $email');
+        }
+
+        return AuthResult(
+          success: true,
+          message: 'Se ha enviado un enlace de recuperación a tu email'
+        );
+      } else {
+        // Manejar errores específicos de Firebase
+        if (responseData['error'] != null) {
+          final errorMessage = responseData['error']['message'];
+          
+          if (errorMessage == 'EMAIL_NOT_FOUND') {
+            return AuthResult.failure(
+              AuthError.emailNotFound,
+              'No existe una cuenta con este email'
+            );
+          } else if (errorMessage == 'INVALID_EMAIL') {
+            return AuthResult.failure(
+              AuthError.invalidEmail,
+              'El formato del email no es válido'
+            );
+          }
+        }
+        
+        return AuthResult.failure(
+          AuthError.serverError,
+          'Error del servidor al enviar el email de recuperación'
+        );
+      }
+
+    } on TimeoutException {
+      return AuthResult.failure(
+        AuthError.networkError,
+        'Tiempo de espera agotado. Verifica tu conexión a internet.'
+      );
+    } catch (e) {
+      if (FirebaseConfig.enableDebugMode) {
+        print('Password Reset Error: $e');
+      }
+      return AuthResult.failure(
+        AuthError.unknown,
+        'Error inesperado: ${e.toString()}'
+      );
+    }
+  }
 
 
   // Validación de email

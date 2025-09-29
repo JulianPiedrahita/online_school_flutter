@@ -328,7 +328,25 @@ class _LoginForm extends StatelessWidget {
                   ),
                 ),
                 
-                SizedBox(height: getResponsiveValue(20, 18, 22, 25)),
+                SizedBox(height: getResponsiveValue(12, 10, 14, 16)),
+                
+                // Enlace "¿Olvidaste tu contraseña?"
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => _showForgotPasswordDialog(context),
+                    child: Text(
+                      '¿Olvidaste tu contraseña?',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: getResponsiveValue(14, 13, 15, 16),
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
+                
+                SizedBox(height: getResponsiveValue(8, 6, 10, 12)),
                 
                 // Separador "O"
                 Row(
@@ -389,22 +407,6 @@ class _LoginForm extends StatelessWidget {
                   ],
                 ),
                 
-                SizedBox(height: getResponsiveValue(10, 12, 15, 18)),
-                
-                // Link para olvidé contraseña
-                TextButton(
-                  onPressed: authController.isLoading ? null : () {
-                    // TODO: Implementar recuperación de contraseña
-                  },
-                  child: Text(
-                    '¿Olvidaste tu contraseña?',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: getResponsiveValue(12, 13, 15, 16),
-                    ),
-                  ),
-                ),
-                
                 // Link para ir al registro
                 TextButton(
                   onPressed: authController.isLoading ? null : () {
@@ -448,6 +450,90 @@ class _LoginForm extends StatelessWidget {
         backgroundColor: Colors.orange,
         duration: Duration(seconds: 2),
       ),
+    );
+  }
+
+  void _showForgotPasswordDialog(BuildContext context) {
+    final TextEditingController emailController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Color(0xff1B4332),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            '¿Olvidaste tu contraseña?',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña.',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                ),
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Email',
+                  hintStyle: TextStyle(color: Colors.white54),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.1),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.email_outlined,
+                    color: Colors.white70,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final email = emailController.text.trim();
+                if (email.isNotEmpty) {
+                  Navigator.of(context).pop();
+                  await authController.sendPasswordResetEmail(context, email);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xff40916C),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text(
+                'Enviar',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

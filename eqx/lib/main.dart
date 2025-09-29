@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:eqx/screens/home_screen.dart';
 import 'package:eqx/screens/login_screen.dart';
 import 'package:eqx/screens/register_screen.dart';
+import 'package:eqx/screens/landing_page.dart';
+import 'package:eqx/screens/splash_screen.dart';
  
 void main() => runApp(MyApp());
  
@@ -15,11 +18,12 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Material App',
+      title: 'EQX - Ministerio de Evangelización',
       theme: ThemeData.dark(),
-      initialRoute: 'login_screen',
+      initialRoute: kIsWeb ? 'landing_page' : 'splash_screen',
       routes: {
-    
+        'splash_screen' : ( _ ) => SplashScreen(),
+        'landing_page' : ( _ ) => LandingPage(),
         'login_screen' : ( _ ) => LoginScreen(),
         'register_screen' : ( _ ) => RegisterScreen(),
         'home_screen'  : ( _ ) => HomeScreen(), 
