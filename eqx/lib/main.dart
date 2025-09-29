@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'package:eqx/screens/home_screen.dart';
 import 'package:eqx/screens/login_screen.dart';
@@ -9,13 +8,7 @@ import 'package:eqx/screens/register_screen.dart';
 import 'package:eqx/screens/landing_page.dart';
 import 'package:eqx/screens/splash_screen.dart';
  
-void main() {
-  // Configurar URL strategy para eliminar el # de las URLs
-  if (kIsWeb) {
-    usePathUrlStrategy();
-  }
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
  
 class MyApp extends StatelessWidget {
   @override
