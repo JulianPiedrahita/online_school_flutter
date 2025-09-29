@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:eqx/widgets/background.dart';
 
@@ -49,44 +50,38 @@ class _StickyBannerSection extends StatefulWidget {
 class __StickyBannerSectionState extends State<_StickyBannerSection> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  late Timer _timer;
 
-  final List<Map<String, String>> bannerImages = [
-    {
-      'image': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=600&fit=crop&q=85',
-      'title': 'Llevando el Evangelio',
-      'subtitle': 'Compartiendo la palabra de Dios con amor y dedicación'
-    },
-    {
-      'image': 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1920&h=600&fit=crop&q=85',
-      'title': 'Comunidad de Fe',
-      'subtitle': 'Unidos en Cristo para servir y evangelizar'
-    },
-    {
-      'image': 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1920&h=600&fit=crop&q=85',
-      'title': 'Transformando Vidas',
-      'subtitle': 'A través del poder del evangelio y el amor de Cristo'
-    },
+  final List<String> bannerImages = [
+    'assets/banner_principal/banner.jpg',
+    'assets/banner_principal/cirdulos.jpg',
+    'assets/banner_principal/escudo.jpg',
   ];
 
   @override
   void initState() {
     super.initState();
-    // Auto-scroll del banner
-    Future.delayed(Duration(seconds: 3), _autoScroll);
+    // Auto-scroll continuo del banner
+    _timer = Timer.periodic(Duration(seconds: 4), (timer) {
+      if (mounted && _pageController.hasClients) {
+        _currentPage++;
+        if (_currentPage >= bannerImages.length * 1000) {
+          _currentPage = 0;
+        }
+        _pageController.animateToPage(
+          _currentPage,
+          duration: Duration(milliseconds: 800),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
-  void _autoScroll() {
-    if (mounted) {
-      setState(() {
-        _currentPage = (_currentPage + 1) % bannerImages.length;
-      });
-      _pageController.animateToPage(
-        _currentPage,
-        duration: Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-      Future.delayed(Duration(seconds: 4), _autoScroll);
-    }
+  @override
+  void dispose() {
+    _timer.cancel();
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -109,83 +104,27 @@ class __StickyBannerSectionState extends State<_StickyBannerSection> {
     
     return Container(
       height: getResponsiveValue(
-        isVerySmallScreen ? 220 : (isSmallScreen ? 250 : 280),
-        320, 360
-      ), // Altura optimizada para banner sticky
+        isVerySmallScreen ? 280 : (isSmallScreen ? 320 : 380),
+        420, 480
+      ), // Altura optimizada para mejor proporción de imágenes
       child: Stack(
         children: [
           PageView.builder(
             controller: _pageController,
-            itemCount: bannerImages.length,
+            itemCount: null, // Infinito
             onPageChanged: (index) {
               setState(() {
-                _currentPage = index;
+                _currentPage = index % bannerImages.length;
               });
             },
             itemBuilder: (context, index) {
+              final imageIndex = index % bannerImages.length;
               return Container(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: NetworkImage(bannerImages[index]['image']!),
+                    image: AssetImage(bannerImages[imageIndex]),
                     fit: BoxFit.cover,
-                  ),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.black.withOpacity(0.6),
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.6),
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          bannerImages[index]['title']!,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: getResponsiveValue(
-                              isVerySmallScreen ? 20 : (isSmallScreen ? 24 : 28),
-                              32, 36
-                            ),
-                            fontWeight: FontWeight.bold,
-                            shadows: [
-                              Shadow(
-                                offset: Offset(2, 2),
-                                blurRadius: 4,
-                                color: Colors.black.withOpacity(0.8),
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: getResponsiveValue(8, 10, 12)),
-                        Text(
-                          bannerImages[index]['subtitle']!,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: getResponsiveValue(
-                              isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
-                              18, 20
-                            ),
-                            shadows: [
-                              Shadow(
-                                offset: Offset(1, 1),
-                                blurRadius: 2,
-                                color: Colors.black.withOpacity(0.8),
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+                    alignment: Alignment.center,
                   ),
                 ),
               );
@@ -218,12 +157,6 @@ class __StickyBannerSectionState extends State<_StickyBannerSection> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 }
 
@@ -443,11 +376,8 @@ class _ContentSections extends StatelessWidget {
 
 A través de la enseñanza bíblica sólida, el discipulado personal y el testimonio viviente, buscamos hacer discípulos que a su vez hagan discípulos, cumpliendo así la Gran Comisión que nuestro Señor nos dejó.''',
           bannerImages: [
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=800&fit=crop&q=85',
-            'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1200&h=800&fit=crop&q=85',
-            'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1200&h=800&fit=crop&q=85',
-            'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=800&fit=crop&q=85',
-            'https://images.unsplash.com/photo-1497486751825-1233686d5d80?w=1200&h=800&fit=crop&q=85',
+            'assets/banners_secciones_1/boquia.jpeg',
+            'assets/banners_secciones_1/central.jpeg',
           ],
           isImageLeft: true,
         ),
@@ -459,11 +389,8 @@ A través de la enseñanza bíblica sólida, el discipulado personal y el testim
 
 Nuestros ministerios abarcan desde la enseñanza bíblica hasta obras de caridad, siempre guiados por el Espíritu Santo y fundamentados en la Palabra de Dios, buscando glorificar a nuestro Padre celestial en todo lo que hacemos.''',
           bannerImages: [
-            'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&h=800&fit=crop&q=85',
-            'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&h=800&fit=crop&q=85',
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=800&fit=crop&q=85',
-            'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=800&fit=crop&q=85',
-            'https://images.unsplash.com/photo-1497486751825-1233686d5d80?w=1200&h=800&fit=crop&q=85',
+            'assets/banners_secciones_2/pinares.jpeg',
+            'assets/banners_secciones_2/salon_central.jpeg',
           ],
           isImageLeft: false,
         ),
@@ -539,8 +466,8 @@ class __ContentSectionWithBannerState extends State<_ContentSectionWithBanner> {
     Widget bannerWidget = Container(
       width: isMobileScreen ? double.infinity : getResponsiveValue(350, 400, 450, 500),
       height: getResponsiveValue(
-        isVerySmallScreen ? 200 : (isSmallScreen ? 220 : 250),
-        280, 320, 350
+        isVerySmallScreen ? 280 : (isSmallScreen ? 320 : 360),
+        400, 440, 480
       ),
       child: Stack(
         children: [
@@ -558,7 +485,7 @@ class __ContentSectionWithBannerState extends State<_ContentSectionWithBanner> {
                 return Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: NetworkImage(widget.bannerImages[index]),
+                      image: AssetImage(widget.bannerImages[index]),
                       fit: BoxFit.cover,
                     ),
                   ),
