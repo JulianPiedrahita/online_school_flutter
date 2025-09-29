@@ -109,9 +109,9 @@ class __StickyBannerSectionState extends State<_StickyBannerSection> {
     
     return Container(
       height: getResponsiveValue(
-        isVerySmallScreen ? 250 : (isSmallScreen ? 280 : 300),
-        350, 400
-      ), // Altura reducida para banner sticky
+        isVerySmallScreen ? 220 : (isSmallScreen ? 250 : 280),
+        320, 360
+      ), // Altura optimizada para banner sticky
       child: Stack(
         children: [
           PageView.builder(
@@ -537,10 +537,10 @@ class __ContentSectionWithBannerState extends State<_ContentSectionWithBanner> {
     }
 
     Widget bannerWidget = Container(
-      width: isMobileScreen ? double.infinity : getResponsiveValue(400, 500, 600, 700),
+      width: isMobileScreen ? double.infinity : getResponsiveValue(350, 400, 450, 500),
       height: getResponsiveValue(
-        isVerySmallScreen ? 300 : (isSmallScreen ? 350 : 400),
-        450, 500, 550
+        isVerySmallScreen ? 200 : (isSmallScreen ? 220 : 250),
+        280, 320, 350
       ),
       child: Stack(
         children: [
