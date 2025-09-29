@@ -104,9 +104,9 @@ class __StickyBannerSectionState extends State<_StickyBannerSection> {
     
     return Container(
       height: getResponsiveValue(
-        isVerySmallScreen ? 280 : (isSmallScreen ? 320 : 380),
-        420, 480
-      ), // Altura optimizada para mejor proporción de imágenes
+        isVerySmallScreen ? 220 : (isSmallScreen ? 250 : 280),
+        320, 350
+      ), // Altura reducida para mejor balance con el contenido
       child: Stack(
         children: [
           PageView.builder(
@@ -465,11 +465,9 @@ class __ContentSectionWithBannerState extends State<_ContentSectionWithBanner> {
 
     Widget bannerWidget = Container(
       width: isMobileScreen ? double.infinity : getResponsiveValue(350, 400, 450, 500),
-      height: getResponsiveValue(
-        isVerySmallScreen ? 280 : (isSmallScreen ? 320 : 360),
-        400, 440, 480
-      ),
-      child: Stack(
+      child: AspectRatio(
+        aspectRatio: isMobileScreen ? 16/9 : 4/3,
+        child: Stack(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -600,6 +598,7 @@ class __ContentSectionWithBannerState extends State<_ContentSectionWithBanner> {
           ),
         ],
       ),
+        ),
     );
 
     Widget textWidget = Container(
@@ -667,10 +666,11 @@ class __ContentSectionWithBannerState extends State<_ContentSectionWithBanner> {
                 textWidget,
               ],
             )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: widget.isImageLeft
+          : IntrinsicHeight(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: widget.isImageLeft
                   ? [
                       bannerWidget,
                       SizedBox(width: getResponsiveValue(30, 40, 60, 80)),
@@ -681,6 +681,7 @@ class __ContentSectionWithBannerState extends State<_ContentSectionWithBanner> {
                       SizedBox(width: getResponsiveValue(30, 40, 60, 80)),
                       bannerWidget,
                     ],
+              ),
             ),
     );
   }
