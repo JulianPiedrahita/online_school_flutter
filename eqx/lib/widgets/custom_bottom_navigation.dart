@@ -1,7 +1,11 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:eqx/screens/calendario_eventos_screen.dart';
 
 class CustomBottomNavigation extends StatefulWidget {
+  static Map<String, dynamic>? casaDePaz;
+  
+  static Map<DateTime, List<Map<String, dynamic>>> eventos = {};
   
   @override
   _CustomBottomNavigationState createState() => _CustomBottomNavigationState();
@@ -9,6 +13,8 @@ class CustomBottomNavigation extends StatefulWidget {
 
 class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
   int currentIndex = 0;
+  // Variable global temporal para eventos
+  
   
   @override
   Widget build(BuildContext context) {
@@ -86,6 +92,16 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
             setState(() {
               currentIndex = index;
             });
+            if (index == 0) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CalendarioEventosScreen(eventos: CustomBottomNavigation.eventos),
+                ),
+              );
+            } else if (index == 3) {
+              Navigator.pushNamed(context, '/mapa');
+            }
           },
           type: BottomNavigationBarType.fixed,
           elevation: 0,
@@ -93,17 +109,22 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
             BottomNavigationBarItem(
               icon: Icon(Icons.calendar_today_outlined, size: iconSize),
               activeIcon: Icon(Icons.calendar_today, size: iconSize * 1.1),
-              label: 'Calendario'
+              label: 'Calendario',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.message_outlined, size: iconSize),
               activeIcon: Icon(Icons.message, size: iconSize * 1.1),
-              label: 'Mensajes'
+              label: 'Mensajes',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.radio_outlined, size: iconSize),
               activeIcon: Icon(Icons.radio, size: iconSize * 1.1),
-              label: 'Radio'
+              label: 'Radio',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.map_outlined, size: iconSize),
+              activeIcon: Icon(Icons.map, size: iconSize * 1.1),
+              label: 'Mapa',
             ),
           ],
         ),

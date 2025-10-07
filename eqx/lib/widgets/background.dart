@@ -11,8 +11,8 @@ class Background extends StatelessWidget {
         end: Alignment.bottomCenter,
         stops: [0.2, 0.8],
         colors: [
-          Color(0xff1B4332),
-          Color(0xff40916C)
+          Color(0xff1B4332).withOpacity(0.5),
+          Color(0xff40916C).withOpacity(0.5)
         ]
       )
   );

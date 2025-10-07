@@ -1,7 +1,20 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:eqx/widgets/custom_bottom_navigation.dart';
+import 'package:eqx/screens/evento_form_screen.dart';
+import 'package:eqx/screens/evento_form_screen.dart';
+import 'package:eqx/screens/casa_de_paz_form_screen.dart';
+
+// Emulación: solo para pruebas locales, nunca usar en producción
+String? getGoogleApiKey() {
+  // En modo debug/dev, retorna una clave simulada para emular el flujo
+  if (kDebugMode) {
+    return 'FAKE-API-KEY-FOR-DEV-ONLY';
+  }
+  // En release, fuerza a que se configure correctamente
+  return null;
+}
 
 class CardTableResponsive extends StatefulWidget {
   @override
@@ -65,6 +78,48 @@ class _CardTableResponsiveState extends State<CardTableResponsive> {
     );
   }
   
+  void _handleCardTap(String text) {
+    if (text == 'Eventos') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EventoFormScreen(
+            onSave: (evento) {
+              final fecha = DateTime(evento['fecha'].year, evento['fecha'].month, evento['fecha'].day);
+              final eventos = CustomBottomNavigation.eventos;
+              if (!eventos.containsKey(fecha)) {
+                eventos[fecha] = [];
+              }
+              eventos[fecha]!.add({
+                'nombre': evento['nombre'],
+                'descripcion': evento['descripcion'],
+              });
+            },
+          ),
+        ),
+      );
+    } else if (text == 'Casas de paz') {
+      final String? googleApiKey = getGoogleApiKey();
+      if (googleApiKey == null || googleApiKey.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: Debes configurar la Google API Key de forma segura.')),
+        );
+        return;
+      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CasaDePazFormScreen(
+            onSave: (casa) {
+              CustomBottomNavigation.casaDePaz = casa;
+            },
+            googleApiKey: googleApiKey,
+          ),
+        ),
+      );
+    }
+  }
+
   Widget _buildGridLayout(List<Map<String, dynamic>> items, int columnCount) {
     return GridView.builder(
       shrinkWrap: true,
@@ -87,6 +142,7 @@ class _CardTableResponsiveState extends State<CardTableResponsive> {
             setState(() {
               selectedIndex = index;
             });
+            _handleCardTap(item['text']);
           },
         );
       },
@@ -108,6 +164,7 @@ class _CardTableResponsiveState extends State<CardTableResponsive> {
                 setState(() {
                   selectedIndex = i;
                 });
+                _handleCardTap(items[i]['text']);
               },
             ),
             i + 1 < items.length
@@ -120,6 +177,7 @@ class _CardTableResponsiveState extends State<CardTableResponsive> {
                       setState(() {
                         selectedIndex = i + 1;
                       });
+                      _handleCardTap(items[i + 1]['text']);
                     },
                   )
                 : Container(), // Celda vacía si es impar
@@ -127,7 +185,6 @@ class _CardTableResponsiveState extends State<CardTableResponsive> {
         ),
       );
     }
-    
     return Table(children: rows);
   }
 }

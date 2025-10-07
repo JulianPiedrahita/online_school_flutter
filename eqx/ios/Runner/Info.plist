@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- Permisos de ubicación para mapas y GPS -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Esta app necesita acceder a tu ubicación para mostrar tu posición en el mapa y encontrar Casas de Paz cercanas.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Esta app necesita acceder a tu ubicación incluso en segundo plano para mejorar la experiencia de mapas y geolocalización.</string>
 </dict>
 </plist>

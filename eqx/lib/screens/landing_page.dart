@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:eqx/widgets/background.dart';
 
 class LandingPage extends StatelessWidget {
@@ -103,10 +104,15 @@ class __StickyBannerSectionState extends State<_StickyBannerSection> {
     }
     
     return Container(
-      height: getResponsiveValue(
-        isVerySmallScreen ? 220 : (isSmallScreen ? 250 : 280),
-        320, 350
-      ), // Altura reducida para mejor balance con el contenido
+      height: kIsWeb 
+        ? getResponsiveValue(
+            isVerySmallScreen ? 220 : (isSmallScreen ? 250 : 280),
+            320, 350
+          ) // Altura optimizada SOLO para web
+        : getResponsiveValue(
+            isVerySmallScreen ? 280 : (isSmallScreen ? 320 : 380),
+            420, 480
+          ), // Altura original para móvil INTACTA
       child: Stack(
         children: [
           PageView.builder(

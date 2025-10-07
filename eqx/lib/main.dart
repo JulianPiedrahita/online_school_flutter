@@ -7,6 +7,7 @@ import 'package:eqx/screens/login_screen.dart';
 import 'package:eqx/screens/register_screen.dart';
 import 'package:eqx/screens/landing_page.dart';
 import 'package:eqx/screens/splash_screen.dart';
+import 'package:eqx/screens/mapa_screen.dart';
  
 void main() => runApp(MyApp());
  
@@ -26,7 +27,8 @@ class MyApp extends StatelessWidget {
         'landing_page' : ( _ ) => LandingPage(),
         'login_screen' : ( _ ) => LoginScreen(),
         'register_screen' : ( _ ) => RegisterScreen(),
-        'home_screen'  : ( _ ) => HomeScreen(), 
+        'home_screen'  : ( _ ) => HomeScreen(),
+        '/mapa': (_) => MapaScreen(),
       },
     );
   }
