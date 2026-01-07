@@ -28,24 +28,23 @@ jobs:
           dart --version
 
       - name: Get dependencies
-        run: flutter pub get
-        working-directory: ./eqx
+        run: flutter pub get --directory eqx
 
       - name: Enable web and build
         run: |
+          cd eqx
           flutter config --enable-web
           flutter build web --release --base-href "/"
-        working-directory: ./eqx
 
       - name: Install Vercel CLI
-        run: npm install -g vercel
-        working-directory: ./eqx
+        run: |
+          cd eqx
+          npm install -g vercel
 
       - name: Deploy to Vercel
         run: |
-          cd build/web
+          cd eqx/build/web
           vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./eqx
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
