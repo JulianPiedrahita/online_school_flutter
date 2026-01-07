@@ -39,7 +39,7 @@ jobs:
           cd eqx
           npm install -g vercel
 
-      - name: Deploy to Vercel
+      - name: Configurar usuario git autorizado
         run: |
           git config --global user.name "JulianPiedrahita"
           git config --global user.email "piedrahitajulian32@gmail.com"
