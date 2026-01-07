@@ -41,6 +41,11 @@ jobs:
 
       - name: Deploy to Vercel
         run: |
+          git config --global user.name "JulianPiedrahita"
+          git config --global user.email "piedrahitajulian32@gmail.com"
+
+      - name: Deploy to Vercel
+        run: |
           cd eqx/build/web
           vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
         env:
