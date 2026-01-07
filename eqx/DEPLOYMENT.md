@@ -1,3 +1,24 @@
+# CI/CD con GitLab y Vercel
+
+1. **Configura tu token de Vercel:**
+  - Ve a tu cuenta de Vercel y genera un token desde https://vercel.com/account/tokens
+  - En tu proyecto de GitLab, ve a *Settings > CI/CD > Variables* y agrega una variable llamada `VERCEL_TOKEN` con el valor de tu token.
+
+2. **Estructura del pipeline:**
+  - El pipeline ejecutará el deploy a Vercel automáticamente cada vez que se haga push a la rama `main`.
+
+3. **Personalización:**
+  - Si tu proyecto requiere otros comandos de build, agrega los pasos necesarios antes del comando `vercel` en `.gitlab-ci.yml`.
+
+4. **Requisitos:**
+  - El proyecto debe estar vinculado a Vercel y tener configurado el dominio/proyecto correspondiente.
+
+5. **Despliegue manual:**
+  - Puedes ejecutar el pipeline manualmente desde la interfaz de GitLab si lo necesitas.
+
+---
+
+¿Dudas? Consulta la documentación oficial de [Vercel CLI](https://vercel.com/docs/cli) y [GitLab CI/CD](https://docs.gitlab.com/ee/ci/).
 # 🚀 Deployment Setup - Flutter Web to Vercel
 
 Este proyecto está configurado para desplegarse automáticamente en Vercel usando GitHub Actions.

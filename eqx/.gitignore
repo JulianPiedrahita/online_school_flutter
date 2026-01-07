@@ -48,6 +48,8 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
+/eqx/flutter_windows.zip
+*.zip
 /android/app/debug
 /android/app/profile
 /android/app/release
