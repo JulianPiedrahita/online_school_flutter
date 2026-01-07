@@ -11,36 +11,35 @@ jobs:
   deploy:
     name: Build and Deploy Flutter Web
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: eqx
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.10.4'
-        channel: 'stable'
-        cache: true
-        
-    - name: Get dependencies
-      run: flutter pub get
-      
-    - name: Enable web and build
-      run: |
-        flutter config --enable-web
-        flutter build web --release --base-href "/"
-        
-    - name: Install Vercel CLI
-      run: npm install -g vercel
-      
-    - name: Deploy to Vercel
-      run: |
-        cd build/web
-        vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
-      env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: eqx
+
+      - name: Enable web and build
+        run: |
+          flutter config --enable-web
+          flutter build web --release --base-href "/"
+        working-directory: eqx
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel
+        run: |
+          cd build/web
+          vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+        working-directory: eqx
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
