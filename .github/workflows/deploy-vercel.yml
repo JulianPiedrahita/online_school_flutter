@@ -28,7 +28,7 @@ jobs:
           dart --version
 
       - name: Get dependencies
-        run: flutter pub get --directory eqx
+        run: cd eqx && flutter pub get
 
       - name: Enable web and build
         run: |
