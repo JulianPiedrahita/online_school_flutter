@@ -74,6 +74,12 @@ flutter:
     - assets/banner_principal/
     - assets/banners_secciones_1/
     - assets/banners_secciones_2/
+    - assets/community_service/armenia/
+    - assets/community_service/sevilla/
+    - assets/community_service/spain/
+
+    # Agregado para Ministerio
+    - assets/bob.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

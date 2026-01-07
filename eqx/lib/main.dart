@@ -8,6 +8,9 @@ import 'package:eqx/screens/register_screen.dart';
 import 'package:eqx/screens/landing_page.dart';
 import 'package:eqx/screens/splash_screen.dart';
 import 'package:eqx/screens/mapa_screen.dart';
+import 'package:eqx/screens/ministerio_screen.dart';
+import 'package:eqx/screens/contacto_screen.dart';
+import 'package:eqx/screens/servicio_comunidad_screen.dart';
  
 void main() => runApp(MyApp());
  
@@ -22,14 +25,17 @@ class MyApp extends StatelessWidget {
       title: 'EQX - Ministerio de Evangelización',
       theme: ThemeData.dark(),
       initialRoute: kIsWeb ? 'landing_page' : 'splash_screen',
-      routes: {
-        'splash_screen' : ( _ ) => SplashScreen(),
-        'landing_page' : ( _ ) => LandingPage(),
-        'login_screen' : ( _ ) => LoginScreen(),
-        'register_screen' : ( _ ) => RegisterScreen(),
-        'home_screen'  : ( _ ) => HomeScreen(),
-        '/mapa': (_) => MapaScreen(),
-      },
+        routes: {
+          'splash_screen' : ( _ ) => SplashScreen(),
+          'landing_page' : ( _ ) => LandingPage(),
+          'login_screen' : ( _ ) => LoginScreen(),
+          'register_screen' : ( _ ) => RegisterScreen(),
+          'home_screen'  : ( _ ) => HomeScreen(),
+          '/mapa': (_) => MapaScreen(),
+          'ministerio_screen': (_) => MinisterioScreen(),
+          'contacto_screen': (_) => ContactoScreen(),
+          'servicio_comunidad_screen': (context) => ServicioComunidadScreen(),
+        },
     );
   }
 }

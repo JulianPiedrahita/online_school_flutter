@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:eqx/widgets/background.dart';
+import 'package:eqx/widgets/sticky_navigation_menu.dart';
+import 'package:eqx/widgets/footer.dart';
 
 class LandingPage extends StatelessWidget {
   @override
@@ -12,11 +14,10 @@ class LandingPage extends StatelessWidget {
           Background(),
           Column(
             children: [
-              // Banner fijo
-              _StickyBannerSection(),
+              // Banner fijo eliminado
               
               // Menú fijo
-              _StickyNavigationMenu(),
+              StickyNavigationMenu(),
               
               // Contenido scrolleable
               Expanded(
@@ -26,11 +27,29 @@ class LandingPage extends StatelessWidget {
                       // Espaciado para compensar el banner y menú fijos
                       SizedBox(height: 20),
                       
-                      // Secciones de contenido
-                      _ContentSections(),
+                      // Sección 1
+                      // Solo se deja la sección de Misión y Visión, eliminando el banner y Comunidad y Servicio
+                      _ContentSectionWithBanner(
+                        title: 'Nuestra Misión',
+                        content: '''Equipar para Multiplicar es un ministerio internacional que existe para entrenar y acompañar a discípulos de Jesús, ayudándolos a vivir una fe que se reproduce. Caminamos junto a la iglesia local para formar discípulos que hacen más discípulos y, como fruto de esa multiplicación, participan en la plantación de nuevas iglesias para la expansión del Reino de Dios.''',
+                        bannerImages: [
+                          'assets/banners_secciones_1/boquia.jpeg',
+                          'assets/banners_secciones_1/central.jpeg',
+                        ],
+                        isImageLeft: true,
+                      ),
+                      _ContentSectionWithBanner(
+                        title: 'Nuestra Visión',
+                        content: '''Anhelamos ver un movimiento creciente de discípulos que hacen discípulos, iglesias que plantan iglesias y comunidades transformadas por el poder del Evangelio, en cada nación y cultura, para la gloria de Jesucristo.''',
+                        bannerImages: [
+                          'assets/banners_secciones_2/pinares.jpeg',
+                          'assets/banners_secciones_2/salon_central.jpeg',
+                        ],
+                        isImageLeft: false,
+                      ),
                       
                       // Footer
-                      _Footer(),
+                      Footer(),
                     ],
                   ),
                 ),
@@ -43,367 +62,6 @@ class LandingPage extends StatelessWidget {
   }
 }
 
-class _StickyBannerSection extends StatefulWidget {
-  @override
-  __StickyBannerSectionState createState() => __StickyBannerSectionState();
-}
-
-class __StickyBannerSectionState extends State<_StickyBannerSection> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-  late Timer _timer;
-
-  final List<String> bannerImages = [
-    'assets/banner_principal/banner.jpg',
-    'assets/banner_principal/cirdulos.jpg',
-    'assets/banner_principal/escudo.jpg',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    // Auto-scroll continuo del banner
-    _timer = Timer.periodic(Duration(seconds: 4), (timer) {
-      if (mounted && _pageController.hasClients) {
-        _currentPage++;
-        if (_currentPage >= bannerImages.length * 1000) {
-          _currentPage = 0;
-        }
-        _pageController.animateToPage(
-          _currentPage,
-          duration: Duration(milliseconds: 800),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final screenWidth = screenSize.width;
-    final screenHeight = screenSize.height;
-    
-    // Detección completa de tipos de pantalla
-    final isVerySmallScreen = screenHeight < 600;
-    final isSmallScreen = screenHeight < 700;
-    final isMobileScreen = screenWidth < 768;
-    
-    // Función para obtener valores responsive
-    double getResponsiveValue(double mobile, double tablet, double desktop) {
-      if (screenWidth >= 1200) return desktop;
-      if (screenWidth >= 768) return tablet;
-      return mobile;
-    }
-    
-    return Container(
-      height: kIsWeb 
-        ? getResponsiveValue(
-            isVerySmallScreen ? 220 : (isSmallScreen ? 250 : 280),
-            320, 350
-          ) // Altura optimizada SOLO para web
-        : getResponsiveValue(
-            isVerySmallScreen ? 280 : (isSmallScreen ? 320 : 380),
-            420, 480
-          ), // Altura original para móvil INTACTA
-      child: Stack(
-        children: [
-          PageView.builder(
-            controller: _pageController,
-            itemCount: null, // Infinito
-            onPageChanged: (index) {
-              setState(() {
-                _currentPage = index % bannerImages.length;
-              });
-            },
-            itemBuilder: (context, index) {
-              final imageIndex = index % bannerImages.length;
-              return Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(bannerImages[imageIndex]),
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                  ),
-                ),
-              );
-            },
-          ),
-          
-          // Indicadores de página
-          Positioned(
-            bottom: 12,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                bannerImages.length,
-                (index) => Container(
-                  margin: EdgeInsets.symmetric(horizontal: 4),
-                  width: _currentPage == index ? 12 : 8,
-                  height: _currentPage == index ? 12 : 8,
-                  decoration: BoxDecoration(
-                    color: _currentPage == index 
-                        ? Colors.white 
-                        : Colors.white.withOpacity(0.5),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StickyNavigationMenu extends StatefulWidget {
-  @override
-  __StickyNavigationMenuState createState() => __StickyNavigationMenuState();
-}
-
-class __StickyNavigationMenuState extends State<_StickyNavigationMenu> {
-  String _selectedMenu = 'Inicio';
-
-  @override
-  Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final screenWidth = screenSize.width;
-    final screenHeight = screenSize.height;
-    
-    // Detección completa de tipos de pantalla
-    final isVerySmallScreen = screenHeight < 600;
-    final isSmallScreen = screenHeight < 700;
-    final isMobileScreen = screenWidth < 768;
-    
-    // Función para obtener valores responsive
-    double getResponsiveValue(double mobile, double tablet, double desktop) {
-      if (screenWidth >= 1200) return desktop;
-      if (screenWidth >= 768) return tablet;
-      return mobile;
-    }
-    
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: getResponsiveValue(10, 20, 20),
-        vertical: getResponsiveValue(5, 8, 10)
-      ),
-      padding: EdgeInsets.symmetric(
-        vertical: getResponsiveValue(
-          isVerySmallScreen ? 8 : (isSmallScreen ? 12 : 15),
-          18, 20
-        ),
-        horizontal: getResponsiveValue(15, 25, 30)
-      ),
-      decoration: BoxDecoration(
-        color: Color.fromRGBO(255, 255, 255, 0.2),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Color.fromRGBO(255, 255, 255, 0.4),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Logo compacto
-          InkWell(
-            onTap: () => Navigator.pushNamed(context, 'landing_page'),
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: getResponsiveValue(4, 6, 8),
-                vertical: getResponsiveValue(2, 3, 4)
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: getResponsiveValue(
-                      isVerySmallScreen ? 18 : (isSmallScreen ? 20 : 24),
-                      26, 28
-                    ),
-                    height: getResponsiveValue(
-                      isVerySmallScreen ? 18 : (isSmallScreen ? 20 : 24),
-                      26, 28
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      image: DecorationImage(
-                        image: AssetImage('assets/logo.jpg'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: getResponsiveValue(4, 5, 6)),
-                  Text(
-                    'EQX',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: getResponsiveValue(
-                        isVerySmallScreen ? 16 : (isSmallScreen ? 18 : 20),
-                        22, 24
-                      ),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          Spacer(),
-          
-          // Menú items compacto
-          isMobileScreen 
-            ? PopupMenuButton<String>(
-                icon: Icon(Icons.menu, color: Colors.white),
-                onSelected: (value) {
-                  if (value == 'Únete a Nosotros') {
-                    Navigator.pushNamed(context, 'login_screen');
-                  } else if (value == 'Inicio') {
-                    Navigator.pushNamed(context, 'landing_page');
-                  } else {
-                    setState(() {
-                      _selectedMenu = value;
-                    });
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(value: 'Inicio', child: Text('Inicio')),
-                  PopupMenuItem(value: 'Ministerio', child: Text('Ministerio')),
-                  PopupMenuItem(value: 'Únete a Nosotros', child: Text('Únete a Nosotros')),
-                ],
-              )
-            : Row(
-                children: [
-                  _MenuButton(
-                    title: 'Inicio',
-                    isSelected: _selectedMenu == 'Inicio',
-                    onPressed: () {
-                      Navigator.pushNamed(context, 'landing_page');
-                    },
-                  ),
-                  SizedBox(width: getResponsiveValue(15, 18, 20)),
-                  _MenuButton(
-                    title: 'Ministerio',
-                    isSelected: _selectedMenu == 'Ministerio',
-                    onPressed: () {
-                      setState(() {
-                        _selectedMenu = 'Ministerio';
-                      });
-                    },
-                  ),
-                  SizedBox(width: getResponsiveValue(15, 18, 20)),
-                  _MenuButton(
-                    title: 'Únete a Nosotros',
-                    isSelected: _selectedMenu == 'Únete a Nosotros',
-                    onPressed: () {
-                      Navigator.pushNamed(context, 'login_screen');
-                    },
-                    isLoginButton: true,
-                  ),
-                ],
-              ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MenuButton extends StatelessWidget {
-  final String title;
-  final bool isSelected;
-  final VoidCallback onPressed;
-  final bool isLoginButton;
-
-  const _MenuButton({
-    required this.title,
-    required this.isSelected,
-    required this.onPressed,
-    this.isLoginButton = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isLoginButton 
-              ? Color.fromRGBO(255, 255, 255, 0.2)
-              : (isSelected ? Color.fromRGBO(255, 255, 255, 0.1) : Colors.transparent),
-          borderRadius: BorderRadius.circular(12),
-          border: isSelected && !isLoginButton
-              ? Border.all(color: Colors.white.withOpacity(0.5), width: 1)
-              : (isLoginButton ? Border.all(color: Colors.white.withOpacity(0.3), width: 1) : null),
-        ),
-        child: Text(
-          title,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: isSelected || isLoginButton 
-                ? FontWeight.w600 
-                : FontWeight.normal,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ContentSections extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Primera sección
-        _ContentSectionWithBanner(
-          title: 'Nuestra Misión',
-          content: '''Nuestra misión es llevar el mensaje de esperanza y salvación de Jesucristo a cada corazón. Creemos en el poder transformador del evangelio para cambiar vidas, restaurar familias y construir comunidades fuertes en la fe.
-
-A través de la enseñanza bíblica sólida, el discipulado personal y el testimonio viviente, buscamos hacer discípulos que a su vez hagan discípulos, cumpliendo así la Gran Comisión que nuestro Señor nos dejó.''',
-          bannerImages: [
-            'assets/banners_secciones_1/boquia.jpeg',
-            'assets/banners_secciones_1/central.jpeg',
-          ],
-          isImageLeft: true,
-        ),
-        
-        // Segunda sección
-        _ContentSectionWithBanner(
-          title: 'Comunidad y Servicio',
-          content: '''Somos una comunidad unida por el amor de Cristo, comprometida con servir a otros y compartir las buenas nuevas del evangelio. Creemos que cada persona tiene un propósito único en el plan de Dios y trabajamos juntos para edificar el Reino de los Cielos.
-
-Nuestros ministerios abarcan desde la enseñanza bíblica hasta obras de caridad, siempre guiados por el Espíritu Santo y fundamentados en la Palabra de Dios, buscando glorificar a nuestro Padre celestial en todo lo que hacemos.''',
-          bannerImages: [
-            'assets/banners_secciones_2/pinares.jpeg',
-            'assets/banners_secciones_2/salon_central.jpeg',
-          ],
-          isImageLeft: false,
-        ),
-      ],
-    );
-  }
-}
 
 class _ContentSectionWithBanner extends StatefulWidget {
   final String title;
@@ -699,15 +357,24 @@ class __ContentSectionWithBannerState extends State<_ContentSectionWithBanner> {
   }
 }
 
-class _Footer extends StatelessWidget {
+class Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    // Responsive helpers
+    double getResponsiveValue(double mobile, double tablet, double desktop, double ultraWide) {
+      if (screenWidth >= 1440) return ultraWide;
+      if (screenWidth >= 1200) return desktop;
+      if (screenWidth >= 768) return tablet;
+      return mobile;
+    }
     return Container(
-      margin: EdgeInsets.all(40),
-      padding: EdgeInsets.all(40),
+      margin: EdgeInsets.all(getResponsiveValue(16, 24, 32, 48)),
+      padding: EdgeInsets.all(getResponsiveValue(16, 24, 32, 48)),
       decoration: BoxDecoration(
         color: Color.fromRGBO(255, 255, 255, 0.1),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(getResponsiveValue(10, 14, 20, 28)),
         border: Border.all(
           color: Color.fromRGBO(255, 255, 255, 0.2),
           width: 1,
@@ -715,8 +382,8 @@ class _Footer extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: Offset(0, 8),
+            blurRadius: getResponsiveValue(8, 12, 20, 28),
+            offset: Offset(0, getResponsiveValue(2, 4, 8, 12)),
           ),
         ],
       ),
@@ -727,33 +394,33 @@ class _Footer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 24,
-                  height: 24,
+                  width: getResponsiveValue(18, 20, 24, 32),
+                  height: getResponsiveValue(18, 20, 24, 32),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(getResponsiveValue(3, 4, 6, 8)),
                     image: DecorationImage(
                       image: AssetImage('assets/logo.jpg'),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: getResponsiveValue(4, 6, 8, 12)),
                 Text(
                   'EQX',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: getResponsiveValue(14, 16, 20, 28),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            SizedBox(height: getResponsiveValue(8, 12, 16, 24)),
             Text(
               '© 2025 EQX - Ministerio de Evangelización. Todos los derechos reservados.',
               style: TextStyle(
                 color: Colors.white70,
-                fontSize: 14,
+                fontSize: getResponsiveValue(10, 12, 14, 18),
               ),
               textAlign: TextAlign.center,
             ),
